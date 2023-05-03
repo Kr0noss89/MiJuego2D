@@ -4,25 +4,63 @@ using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
-        public float speed = 5.0f;
-    public float jumpForce = 5.0f;
+    
+    public float playerSpeed = 5.5f;
+    public float jumpForce = 3f;
+    private Rigidbody2D rBody;
+    private GroundSensor sensor;
+    public Animator anim;
 
-    private Rigidbody rb;
+    
+    float horizontal;
 
-    void Start() {
-        rb = GetComponent<Rigidbody>();
+    
+    void Start()
+    {
+       
+        
+        rBody = GetComponent<Rigidbody2D>();
+        sensor = GameObject.Find("GroundSensor").GetComponent<GroundSensor>();
+        anim = GetComponent<Animator>();
+        
     }
 
-    void FixedUpdate() {
-        float moveHorizontal = Input.GetAxis("Horizontal");
-        float moveVertical = Input.GetAxis("Vertical");
+    
+    void Update()
 
-        Vector3 movement = new Vector3(moveHorizontal, 0.0f, moveVertical);
+        {
+            horizontal = Input.GetAxis("Horizontal"); 
 
-        rb.AddForce(movement * speed);
+            if(horizontal < 0)
+            {
+                
+                transform.rotation = Quaternion.Euler(0, 180, 0);
+                anim.SetBool("IsRunning", true);
+            }
+            else if(horizontal > 0)
+            {
+                
+                transform.rotation = Quaternion.Euler(0, 0, 0);
+                anim.SetBool("IsRunning", true);
+            }
+            else
+            {
+                anim.SetBool("IsRunning", false);
+            }
 
-        if (Input.GetButtonDown("Jump")) {
-            rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
-        }
+            if(Input.GetButtonDown("Jump") && sensor.isGrounded)
+            {
+                rBody.AddForce(Vector2.up * jumpForce, ForceMode2D.Impulse);
+                anim.SetBool("IsJumping", true);
+            }
+
+        }    
+        
+    
+
+    void FixedUpdate()
+    {
+        rBody.velocity = new Vector2(horizontal * playerSpeed, rBody.velocity.y);
     }
+    
 }
